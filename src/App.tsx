@@ -1,3 +1,4 @@
+import { ChakraProvider } from '@chakra-ui/react';
 import { BrowserRouter as Router, Route, Switch, Redirect } from 'react-router-dom';
 import Home from 'pages/Home';
 import Room from 'pages/Room';
@@ -5,13 +6,15 @@ import Room from 'pages/Room';
 
 const App = () => {
   return (
-    <Router>
-      <Switch>
-        <Route exact path="/" component={Home} />
-        <Route path="/room/:uuid" component={Room} />
-        <Redirect to="/" />
-      </Switch>
-    </Router>
+    <ChakraProvider>
+      <Router>
+        <Switch>
+          <Route exact path="/" component={Home} />
+          <Route path="/room/:uuid" component={Room} />
+          <Redirect to="/" />
+        </Switch>
+      </Router>
+    </ChakraProvider>
   );
 };
 
