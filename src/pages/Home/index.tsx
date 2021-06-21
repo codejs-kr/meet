@@ -2,6 +2,8 @@ import { Link } from 'react-router-dom';
 import { Box, Center, Button, Input, Square, Circle, VStack, Stack } from '@chakra-ui/react';
 import { Heading } from '@chakra-ui/react';
 
+import './index.scss';
+
 const Home = () => {
   return (
     <div className="layout">
