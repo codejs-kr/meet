@@ -3,6 +3,11 @@ import { RootModel } from './';
 
 export const count = createModel<RootModel>()({
   state: 0,
+  selectors: (slice, createSelector) => ({
+    state() {
+      return slice;
+    },
+  }),
   reducers: {
     increment(state, payload: number) {
       return state + payload;
