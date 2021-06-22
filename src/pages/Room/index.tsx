@@ -1,5 +1,7 @@
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
+import socket from '../../modules/socket';
+
 import {
   Box,
   Tooltip,
@@ -19,10 +21,9 @@ import {
 import { PhoneIcon } from '@chakra-ui/icons';
 import { IoMdMic, IoMdMicOff } from 'react-icons/io';
 import { IoVideocam, IoVideocamOff } from 'react-icons/io5';
-
 import PageTemplate from '../../components/layout/PageTemplate';
-
 import './index.scss';
+
 interface PathParams {
   uuid: string;
 }
@@ -37,6 +38,36 @@ const Room = () => {
 
   const handleMic = useCallback(() => {
     alert('handleMic');
+  }, []);
+
+  const handleExit = useCallback(() => {
+    alert('handleExit');
+  }, []);
+
+  const bindSocket = useCallback(() => {
+    socket.emit('gate', uuid);
+    socket.on('gate', (data: any) => {
+      console.log('gate', data);
+    });
+
+    socket.emit('enter', uuid, {
+      nickName: '참여자a',
+      profileImg: 'profileImg',
+    });
+
+    socket.on('join', (roomId: string, info: any) => {
+      console.log('join', roomId, info);
+    });
+    // socket.on('leave', onLeave);
+    // socket.on('message', onMessage);
+  }, []);
+
+  const init = useCallback(() => {
+    bindSocket();
+  }, [bindSocket]);
+
+  useEffect(() => {
+    init();
   }, []);
 
   return (
@@ -75,7 +106,7 @@ const Room = () => {
                 />
               </Tooltip>
               <Tooltip label="나가기" aria-label="나가기">
-                <IconButton colorScheme="red" aria-label="button" icon={<PhoneIcon />} />
+                <IconButton colorScheme="red" aria-label="button" icon={<PhoneIcon />} onClick={handleExit} />
               </Tooltip>
             </HStack>
           </Flex>

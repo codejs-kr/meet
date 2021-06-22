@@ -1,7 +1,7 @@
 import { createModel } from '@rematch/core';
 import { RootModel } from './';
 
-export const count = createModel<RootModel>()({
+export const common = createModel<RootModel>()({
   state: 0,
   selectors: (slice, createSelector) => ({
     state() {
