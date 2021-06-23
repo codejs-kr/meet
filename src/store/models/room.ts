@@ -2,28 +2,32 @@ import { createModel } from '@rematch/core';
 import { RootModel } from './';
 
 interface RoomState {
-  connectedSocket: boolean;
-  participants: any[];
+  isEnteredRoom: boolean;
+  isConnectedSocket: boolean;
+  participants: {} | null;
 }
 
 const initialState: RoomState = {
-  connectedSocket: false,
-  participants: [],
+  isEnteredRoom: false,
+  isConnectedSocket: false,
+  participants: null,
 };
 
 export const room = createModel<RootModel>()({
   state: initialState,
   selectors: (slice, createSelector) => ({
-    state() {
-      return slice;
-    },
+    state: () => slice,
   }),
   reducers: {
-    connectSocket(state, payload: boolean) {
-      state.connectedSocket = payload;
+    updateSocketConnectionState(state, payload: boolean) {
+      state.isConnectedSocket = payload;
       return state;
     },
-    setParticipants(state, payload: any[]) {
+    updateEnteredRoomState(state, payload: boolean) {
+      state.isEnteredRoom = payload;
+      return state;
+    },
+    updateParticipants(state, payload: {}) {
       state.participants = payload;
       return state;
     },
