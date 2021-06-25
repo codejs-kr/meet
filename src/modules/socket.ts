@@ -10,18 +10,21 @@ let senderId: string | null = null;
 
 interface SocketMessage {
   type: string;
-  data: any;
+  body: any;
 }
 
 type SocketMessageTarget = 'all' | string;
 
-export const sendMessage = (message: SocketMessage, to: SocketMessageTarget = 'all') => {
-  socket.send({
+export const sendMessage = ({ message, to = 'all' }: { message: SocketMessage; to?: SocketMessageTarget }) => {
+  const data = {
     roomId,
     senderId,
     to,
     ...message,
-  });
+  };
+
+  socket.send(data);
+  console.log('sendMessage :>> ', data);
 };
 
 interface SocketInitData {

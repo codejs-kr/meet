@@ -2,24 +2,30 @@ import { useCallback, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Dispatch, select } from '../store';
 
-import socket, { setupBaseInfo, sendMessage } from '../modules/socket';
+import socket, { setupBaseInfo } from '../modules/socket';
 import event from '../modules/event';
 
 const SocketContainer = ({ roomId }: { roomId: string }) => {
+  const { isEnteredRoom, userInfo } = useSelector(select.room.state);
   const dispatch = useDispatch<Dispatch>();
+
+  const onGateIn = useCallback(
+    (roomId: string, info: any) => {
+      console.log('gate', roomId, info);
+      dispatch.room.updateSocketConnectionState(true);
+      dispatch.room.updateParticipants(info.participants);
+    },
+    [dispatch]
+  );
 
   const onJoinUser = useCallback((roomId, data) => {
     console.log('onJoinUser', roomId, data);
-    setupBaseInfo({
-      roomId,
-      userId: data.userInfo.userId,
-    });
-    event.emit('onJoinUser', data);
+    event.emit('join', data);
   }, []);
 
   const onLeaveUser = useCallback((data) => {
     console.log('onLeaveUser', data);
-    event.emit('onLeaveUser', data);
+    event.emit('leave', data);
   }, []);
 
   const onMessage = useCallback((message: { type: string }) => {
@@ -28,31 +34,27 @@ const SocketContainer = ({ roomId }: { roomId: string }) => {
   }, []);
 
   const bindSocket = useCallback(() => {
-    console.log('bindSocket');
     socket.emit('gate', roomId);
-
-    socket.on('gate', (roomId: string, info: any) => {
-      console.log('gate', roomId, info);
-      dispatch.room.updateSocketConnectionState(true);
-      dispatch.room.updateParticipants(info.participants);
-    });
+    socket.on('gate', onGateIn);
     socket.on('join', onJoinUser);
     socket.on('leave', onLeaveUser);
     socket.on('message', onMessage);
-  }, [dispatch, roomId, onJoinUser, onLeaveUser, onMessage]);
+  }, [roomId, onGateIn, onJoinUser, onLeaveUser, onMessage]);
+
+  useEffect(() => {
+    if (!userInfo) {
+      return;
+    }
+
+    setupBaseInfo({
+      roomId,
+      userId: userInfo.userId,
+    });
+  }, [userInfo]);
 
   useEffect(() => {
     bindSocket();
   }, [bindSocket]);
-
-  useEffect(() => {
-    if (false) {
-      socket.emit('enter', roomId, {
-        nickName: '참여자a',
-        profileImg: 'profileImg',
-      });
-    }
-  }, [roomId]);
 
   return null;
 };

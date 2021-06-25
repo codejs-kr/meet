@@ -4,12 +4,14 @@ import { RootModel } from './';
 interface RoomState {
   isEnteredRoom: boolean;
   isConnectedSocket: boolean;
+  userInfo: any | null;
   participants: {} | null;
 }
 
 const initialState: RoomState = {
   isEnteredRoom: false,
   isConnectedSocket: false,
+  userInfo: null,
   participants: null,
 };
 
@@ -29,6 +31,10 @@ export const room = createModel<RootModel>()({
     },
     updateParticipants(state, payload: {}) {
       state.participants = payload;
+      return state;
+    },
+    setUserInfo(state, payload: {}) {
+      state.userInfo = payload;
       return state;
     },
   },
