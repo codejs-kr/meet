@@ -2,11 +2,11 @@ import { useCallback, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Dispatch, select } from '../store';
 
-import socket, { setupBaseInfo } from '../modules/socket';
+import socket, { setupBaseInfo, setParticipants } from '../modules/socket';
 import event from '../modules/event';
 
 const SocketContainer = ({ roomId }: { roomId: string }) => {
-  const { isEnteredRoom, userInfo } = useSelector(select.room.state);
+  const { userInfo } = useSelector(select.room.state);
   const dispatch = useDispatch<Dispatch>();
 
   const onGateIn = useCallback(
@@ -20,6 +20,7 @@ const SocketContainer = ({ roomId }: { roomId: string }) => {
 
   const onJoinUser = useCallback((roomId, data) => {
     console.log('onJoinUser', roomId, data);
+    setParticipants(data.participants);
     event.emit('join', data);
   }, []);
 

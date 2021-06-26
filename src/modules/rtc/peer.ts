@@ -2,9 +2,18 @@ import EventEmitter from 'events';
 import { RTCPeerConnection, RTCSessionDescription, RTCIceCandidate, getDefaultIceServers } from './helpers';
 import { sendMessage } from './../socket';
 
+interface ConnectionInfo {
+  targetUserId: string;
+  type: string;
+}
+
+interface Peer extends ConnectionInfo {
+  pc: any;
+}
+
 class Peer extends EventEmitter {
   private localStream: any = null;
-  private peer: any = null;
+  private peers: Peer[] = [];
   private peerConnectionOptions: any = getDefaultIceServers();
 
   /**
@@ -23,20 +32,30 @@ class Peer extends EventEmitter {
   /**
    * 커넥션 오퍼 전송을 시작을 합니다.
    */
-  startRtcConnection() {
-    this.peer = this.createPeerConnection();
-    this.createOffer(this.peer);
+  startRtcConnection({ targetUserId, type }: ConnectionInfo) {
+    const peer: Peer = this.createPeerConnection({ targetUserId, type });
+    this.createOffer(peer);
   }
 
-  createPeerConnection() {
-    this.peer = new RTCPeerConnection(this.peerConnectionOptions);
-    console.log('New peer ', this.peer);
-    const peer = this.peer;
+  /**
+   * 피어 커넥션을 생성 합니다.
+   */
+  createPeerConnection({ targetUserId, type }: ConnectionInfo) {
+    console.log('[peer] createPeerConnection :>> ', targetUserId, type);
 
-    peer.onicecandidate = (event: any) => {
+    let peer = {
+      targetUserId,
+      type,
+      pc: null,
+    } as Peer;
+
+    peer.pc = new RTCPeerConnection(this.peerConnectionOptions);
+    console.log('[peer] new peer ', peer);
+
+    peer.pc.onicecandidate = (event: any) => {
       if (event.candidate) {
         sendMessage({
-          to: 'all',
+          to: targetUserId,
           message: {
             type: 'signaling',
             body: {
@@ -46,53 +65,49 @@ class Peer extends EventEmitter {
             },
           },
         });
-        // send({
-        //   to: 'all',
-        //   label: event.candidate.sdpMLineIndex,
-        //   id: event.candidate.sdpMid,
-        //   candidate: event.candidate.candidate,
-        // });
       } else {
-        console.info('Candidate denied', event.candidate);
+        console.info('[peer] candidate denied', event.candidate);
       }
     };
 
     /**
      * 크로스브라우징
      */
-    if (peer.ontrack) {
-      peer.ontrack = (event: any) => {
+    if (peer.pc.ontrack) {
+      peer.pc.ontrack = (event: any) => {
         console.log('ontrack', event);
         const stream = event.streams[0];
         this.emit('addRemoteStream', stream);
       };
 
-      peer.onremovetrack = (event: any) => {
+      peer.pc.onremovetrack = (event: any) => {
         console.log('onremovetrack', event);
         const stream = event.streams[0];
         this.emit('removeRemoteStream', stream);
       };
       // 삼성 모바일에서 필요
     } else {
-      peer.onaddstream = (event: any) => {
+      peer.pc.onaddstream = (event: any) => {
         console.log('onaddstream', event);
         this.emit('addRemoteStream', event.stream);
       };
 
-      peer.onremovestream = (event: any) => {
+      peer.pc.onremovestream = (event: any) => {
         console.log('onremovestream', event);
         this.emit('removeRemoteStream', event.stream);
       };
     }
 
-    peer.oniceconnectionstatechange = (event: any) => {
+    peer.pc.oniceconnectionstatechange = (event: any) => {
       console.log(
         'oniceconnectionstatechange',
-        `iceGatheringState: ${peer.iceGatheringState} / iceConnectionState: ${peer.iceConnectionState}`
+        `iceGatheringState: ${peer.pc.iceGatheringState} / iceConnectionState: ${peer.pc.iceConnectionState}`
       );
 
       this.emit('iceConnectionStateChange', event);
     };
+
+    this.peers.push(peer);
 
     return peer;
   }
@@ -100,116 +115,118 @@ class Peer extends EventEmitter {
   /**
    * offer SDP를 생성 한다.
    */
-  createOffer(peer: any) {
-    console.log('createOffer', arguments);
+  createOffer(peer: Peer) {
+    console.log('[peer] createOffer', peer);
 
     if (this.localStream) {
       this.addTrack(peer, this.localStream); // addTrack 제외시 recvonly로 SDP 생성됨
     }
 
-    peer
+    peer.pc
       .createOffer()
       .then((SDP: any) => {
-        peer.setLocalDescription(SDP);
+        peer.pc.setLocalDescription(SDP);
         console.log('Sending offer description', SDP);
 
         sendMessage({
-          to: 'all',
+          to: peer.targetUserId,
           message: {
             type: 'signaling',
             body: {
+              peerType: peer.type,
               sdp: SDP,
             },
           },
         });
-
-        // send({
-        //   to: 'all',
-        //   sdp: SDP,
-        // });
       })
-      .catch((error: any) => {
+      .catch((error: Error) => {
         console.error('Error createOffer', error);
       });
   }
 
-  createAnswer(peer: any, offerSdp: any) {
-    console.log('createAnswer');
+  createAnswer(peer: Peer, offerSdp: any) {
+    console.log('[peer] createAnswer', peer, offerSdp);
 
     if (this.localStream) {
       this.addTrack(peer, this.localStream);
     }
 
-    peer
+    peer.pc
       .setRemoteDescription(new RTCSessionDescription(offerSdp))
       .then(() => {
-        peer
+        peer.pc
           .createAnswer()
           .then((SDP: any) => {
-            peer.setLocalDescription(SDP);
+            peer.pc.setLocalDescription(SDP);
             console.log('Sending answer to peer.', SDP);
 
             sendMessage({
-              to: 'all',
+              to: peer.targetUserId,
               message: {
                 type: 'signaling',
                 body: {
+                  peerType: peer.type,
                   sdp: SDP,
                 },
               },
             });
-
-            // send({
-            //   to: 'all',
-            //   sdp: SDP,
-            // });
           })
-          .catch((error: any) => {
+          .catch((error: Error) => {
             console.error('Error createAnswer', error);
           });
       })
-      .catch((error: any) => {
+      .catch((error: Error) => {
         console.error('Error setRemoteDescription', error);
       });
   }
 
-  signaling(data: any) {
-    console.log('signaling', data);
+  signaling(message: any) {
+    console.log('[peer] signaling', message);
 
+    const data = message.body;
     const sdp = data?.sdp;
     const candidate = data?.candidate;
 
-    // 접속자가 보내온 offer처리
     if (sdp) {
+      // offer sdp에 대한 answer peer 생성
       if (sdp.type === 'offer') {
-        this.peer = this.createPeerConnection();
-        this.createAnswer(this.peer, sdp);
+        const peer = this.createPeerConnection({
+          targetUserId: message.senderId,
+          type: data.peerType,
+        });
+        this.createAnswer(peer, sdp);
 
-        // offer에 대한 응답 처리
+        // answer sdp 처리
       } else if (sdp.type === 'answer') {
-        this.peer.setRemoteDescription(new RTCSessionDescription(sdp));
+        const peer = this.getPeer(message.senderId);
+        peer?.pc.setRemoteDescription(new RTCSessionDescription(sdp));
       }
 
       // offer or answer cadidate처리
     } else if (candidate) {
+      const peer = this.getPeer(message.senderId);
       const iceCandidate = new RTCIceCandidate({
         sdpMid: data.id,
         sdpMLineIndex: data.label,
         candidate: candidate,
       });
 
-      this.peer.addIceCandidate(iceCandidate);
+      peer?.pc.addIceCandidate(iceCandidate);
     }
   }
 
-  addTrack(peer: any, stream: any) {
-    if (peer.addTrack) {
+  addTrack(peer: Peer, stream: any) {
+    if (peer.pc.addTrack) {
       stream.getTracks().forEach((track: any) => {
-        peer.addTrack(track, stream);
+        peer.pc.addTrack(track, stream);
       });
     } else {
-      peer.addStream(stream);
+      peer.pc.addStream(stream);
     }
+  }
+
+  getPeer(targetUserId: string) {
+    return this.peers.find((peer) => peer.targetUserId === targetUserId);
   }
 
   getLocalStream() {
