@@ -5,7 +5,8 @@ interface RoomState {
   isEnteredRoom: boolean;
   isConnectedSocket: boolean;
   userInfo: any | null;
-  participants: {} | null;
+  participants: any | null;
+  remoteVideos: any[];
 }
 
 const initialState: RoomState = {
@@ -13,6 +14,7 @@ const initialState: RoomState = {
   isConnectedSocket: false,
   userInfo: null,
   participants: null,
+  remoteVideos: [],
 };
 
 export const room = createModel<RootModel>()({
@@ -35,6 +37,10 @@ export const room = createModel<RootModel>()({
     },
     setUserInfo(state, payload: {}) {
       state.userInfo = payload;
+      return state;
+    },
+    addRemoteVideo(state, payload: MediaStream) {
+      state.remoteVideos.push(payload);
       return state;
     },
   },

@@ -26,6 +26,8 @@ import PageTemplate from '../../components/layout/PageTemplate';
 import SocketContainer from '../../containers/SocketContainer';
 import GateContainer from '../../containers/GateContainer';
 
+import PipVideo from '../../components/PipVideo';
+
 import { useSelector, useDispatch } from 'react-redux';
 import { Dispatch, select } from '../../store';
 import { peer } from '../../modules/rtc';
@@ -40,10 +42,8 @@ const Room = () => {
   const { roomId } = useParams<PathParams>();
   const history = useHistory();
 
-  const { isEnteredRoom, isConnectedSocket, userInfo } = useSelector(select.room.state);
+  const { isEnteredRoom, isConnectedSocket, userInfo, remoteVideos } = useSelector(select.room.state);
   const dispatch = useDispatch<Dispatch>();
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const videoRef2 = useRef<HTMLVideoElement>(null);
 
   const handleCamera = useCallback(() => {
     alert('handleCamera');
@@ -73,34 +73,29 @@ const Room = () => {
     });
 
     event.on('signaling', (data) => {
-      console.log('signaling', data);
-
       if (userInfo.userId !== data.senderId) {
-        console.log('참여자 시그널링', data);
-        peer.signaling(data.body);
+        peer.signaling(data);
       }
     });
 
     event.on('join', (data) => {
-      if (userInfo.userId !== data.userInfo.userId) {
+      const joinUserId = data.userInfo.userId;
+      if (userInfo.userId !== joinUserId) {
         console.log('참여자 발견', data);
 
-        peer.startRtcConnection();
+        peer.startRtcConnection({
+          targetUserId: joinUserId,
+          type: 'userMedia',
+        });
       }
     });
   }, [userInfo]);
 
   useEffect(() => {
-    if (videoRef.current) {
-      videoRef.current.srcObject = peer.getLocalStream();
-    }
-
-    peer.on('addRemoteStream', (stream) => {
-      if (videoRef2.current) {
-        videoRef2.current.srcObject = stream;
-      }
+    peer.on('addRemoteStream', (stream: MediaStream) => {
+      dispatch.room.addRemoteVideo(stream);
     });
-  }, [videoRef, videoRef2, isEnteredRoom]);
+  }, [dispatch]);
 
   return (
     <PageTemplate id="room">
@@ -116,13 +111,11 @@ const Room = () => {
                   isConnectedSocket: {isConnectedSocket ? 'true' : 'false'}
                 </Text>
 
-                <div className="video-wrap">
-                  <video autoPlay ref={videoRef} />
-                </div>
+                <PipVideo stream={peer.getLocalStream()} />
 
-                <div className="video-wrap">
-                  <video autoPlay ref={videoRef2} />
-                </div>
+                {remoteVideos.map((stream) => (
+                  <PipVideo stream={stream} />
+                ))}
               </Box>
               <Box w="450px" bg="blue.200">
                 <Text>Chat</Text>
