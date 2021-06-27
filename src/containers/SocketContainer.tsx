@@ -13,16 +13,21 @@ const SocketContainer = ({ roomId }: { roomId: string }) => {
     (roomId: string, info: any) => {
       console.log('gate', roomId, info);
       dispatch.room.updateSocketConnectionState(true);
-      dispatch.room.updateParticipants(info.participants);
+      dispatch.room.setParticipants(info.participants);
     },
     [dispatch]
   );
 
-  const onJoinUser = useCallback((roomId, data) => {
-    console.log('onJoinUser', roomId, data);
-    setParticipants(data.participants);
-    event.emit('join', data);
-  }, []);
+  const onJoinUser = useCallback(
+    (roomId, data) => {
+      console.log('onJoinUser', roomId, data);
+
+      dispatch.room.setParticipants(data.participants);
+      setParticipants(data.participants);
+      event.emit('join', data);
+    },
+    [dispatch]
+  );
 
   const onLeaveUser = useCallback((data) => {
     console.log('onLeaveUser', data);

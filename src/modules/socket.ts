@@ -34,7 +34,6 @@ interface SocketInitData {
 }
 
 export const setParticipants = (data: any) => {
-  console.log('setParticipants :>> ', data);
   participants = data;
 };
 

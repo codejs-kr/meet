@@ -77,26 +77,46 @@ class Peer extends EventEmitter {
       peer.pc.ontrack = (event: any) => {
         console.log('ontrack', event);
         const stream = event.streams[0];
-        this.emit('addRemoteStream', stream);
+        this.emit('addRemoteStream', {
+          userId: peer.targetUserId,
+          stream: stream,
+        });
       };
 
       peer.pc.onremovetrack = (event: any) => {
         console.log('onremovetrack', event);
         const stream = event.streams[0];
-        this.emit('removeRemoteStream', stream);
+        this.emit('removeRemoteStream', {
+          userId: peer.targetUserId,
+          stream: stream,
+        });
       };
       // 삼성 모바일에서 필요
     } else {
       peer.pc.onaddstream = (event: any) => {
         console.log('onaddstream', event);
-        this.emit('addRemoteStream', event.stream);
+        this.emit('addRemoteStream', {
+          userId: peer.targetUserId,
+          stream: event.stream,
+        });
       };
 
       peer.pc.onremovestream = (event: any) => {
         console.log('onremovestream', event);
-        this.emit('removeRemoteStream', event.stream);
+        this.emit('removeRemoteStream', {
+          userId: peer.targetUserId,
+          stream: event.stream,
+        });
       };
     }
+
+    // peer.pc.onnegotiationneeded = (event: any) => {
+    //   console.log('onnegotiationneeded', event);
+    // };
+
+    // peer.pc.onsignalingstatechange = (event: any) => {
+    //   console.log('onsignalingstatechange', event);
+    // };
 
     peer.pc.oniceconnectionstatechange = (event: any) => {
       console.log(
@@ -231,6 +251,26 @@ class Peer extends EventEmitter {
 
   getLocalStream() {
     return this.localStream;
+  }
+
+  mute(type: 'video' | 'audio') {
+    console.log('mute :>> ', type);
+
+    if (type === 'video') {
+      this.localStream.getVideoTracks()[0].enabled = false;
+    } else {
+      this.localStream.getAudioTracks()[0].enabled = false;
+    }
+  }
+
+  unmute(type: 'video' | 'audio') {
+    console.log('unmute :>> ', type);
+
+    if (type === 'video') {
+      this.localStream.getVideoTracks()[0].enabled = true;
+    } else {
+      this.localStream.getAudioTracks()[0].enabled = true;
+    }
   }
 }
 

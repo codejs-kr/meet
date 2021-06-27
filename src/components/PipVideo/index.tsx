@@ -3,9 +3,11 @@ import './index.scss';
 
 interface Props {
   stream: any;
+  videoEnabled: boolean;
+  audioEnabled: boolean;
 }
 
-const PipVideo = ({ stream }: Props) => {
+const PipVideo = ({ stream, videoEnabled, audioEnabled }: Props) => {
   const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
@@ -17,6 +19,8 @@ const PipVideo = ({ stream }: Props) => {
   return (
     <div className="pip-video">
       <video autoPlay ref={videoRef} />
+      {`videoEnabled: ${videoEnabled}`}
+      {`audioEnabled: ${audioEnabled}`}
     </div>
   );
 };

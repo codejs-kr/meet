@@ -11,6 +11,7 @@ import {
   Tooltip,
   IconButton,
   Icon,
+  Grid,
   Center,
   Button,
   Input,
@@ -31,6 +32,7 @@ import PipVideo from '../../components/PipVideo';
 import { useSelector, useDispatch } from 'react-redux';
 import { Dispatch, select } from '../../store';
 import { peer } from '../../modules/rtc';
+import { sendMessage } from '../../modules/socket';
 
 import './index.scss';
 
@@ -42,12 +44,25 @@ const Room = () => {
   const { roomId } = useParams<PathParams>();
   const history = useHistory();
 
-  const { isEnteredRoom, isConnectedSocket, userInfo, remoteVideos } = useSelector(select.room.state);
+  const { isEnteredRoom, isConnectedSocket, userInfo, videos } = useSelector(select.room.state);
+  const localVideoState = useSelector(select.room.localVideoState);
   const dispatch = useDispatch<Dispatch>();
 
+  console.log('localVideoState :>> ', localVideoState);
+
   const handleCamera = useCallback(() => {
-    alert('handleCamera');
-  }, []);
+    if (!localVideoState) {
+      return;
+    }
+
+    if (localVideoState.videoEnabled) {
+      peer.mute('video');
+      dispatch.room.muteVideo({ userId: localVideoState.userId });
+    } else {
+      peer.unmute('video');
+      dispatch.room.unmuteVideo({ userId: localVideoState.userId });
+    }
+  }, [localVideoState]);
 
   const handleMic = useCallback(() => {
     socket.send({
@@ -60,14 +75,15 @@ const Room = () => {
   }, [roomId]);
 
   const handleExit = useCallback(() => {
-    window.location.href = '/';
+    if (window.confirm('미팅에서 나가겠습니까?')) {
+      window.location.href = '/';
+    }
   }, []);
 
   useEffect(() => {
     if (!userInfo) {
       return;
     }
-
     event.on('chat', ({ data }) => {
       console.log('chat', data);
     });
@@ -80,6 +96,7 @@ const Room = () => {
 
     event.on('join', (data) => {
       const joinUserId = data.userInfo.userId;
+
       if (userInfo.userId !== joinUserId) {
         console.log('참여자 발견', data);
 
@@ -92,8 +109,23 @@ const Room = () => {
   }, [userInfo]);
 
   useEffect(() => {
-    peer.on('addRemoteStream', (stream: MediaStream) => {
-      dispatch.room.addRemoteVideo(stream);
+    if (isEnteredRoom && !videos.length) {
+      dispatch.room.addVideo({
+        userId: userInfo.userId,
+        stream: peer.getLocalStream(),
+        videoEnabled: true,
+        audioEnabled: false,
+      });
+    }
+  }, [dispatch, userInfo, isEnteredRoom, videos]);
+
+  useEffect(() => {
+    peer.on('addRemoteStream', (mediaInfo: { userId: string; stream: MediaStream }) => {
+      dispatch.room.addVideo({
+        ...mediaInfo,
+        videoEnabled: true,
+        audioEnabled: false,
+      });
     });
   }, [dispatch]);
 
@@ -103,19 +135,16 @@ const Room = () => {
 
       {isEnteredRoom ? (
         <Flex h="100%" color="white" direction="column">
-          <Box flex="2" bg="blue.500">
+          <Box flex="2">
             <Flex h="100%" color="white" direction="row">
-              <Box w="100%" bg="blue.100">
-                <Text>
-                  Room, {roomId} <br />
-                  isConnectedSocket: {isConnectedSocket ? 'true' : 'false'}
-                </Text>
-
-                <PipVideo stream={peer.getLocalStream()} />
-
-                {remoteVideos.map((stream) => (
-                  <PipVideo stream={stream} />
-                ))}
+              <Box w="100%" padding="10px" bg="#202123">
+                <Flex h="100%" alignItems="center" justifyContent="center">
+                  <Grid templateColumns="repeat(4, 1fr)" gap={3} alignItems="center">
+                    {videos.map(({ stream, videoEnabled, audioEnabled }, i) => (
+                      <PipVideo stream={stream} videoEnabled={videoEnabled} audioEnabled={audioEnabled} key={i} />
+                    ))}
+                  </Grid>
+                </Flex>
               </Box>
               <Box w="450px" bg="blue.200">
                 <Text>Chat</Text>
@@ -128,24 +157,33 @@ const Room = () => {
               <HStack spacing={4}>
                 <Tooltip label="카메라" aria-label="카메라">
                   <IconButton
+                    borderRadius="5px"
                     colorScheme="whiteAlpha"
                     aria-label="button"
                     fontSize="22px"
-                    icon={true ? <Icon as={IoVideocam} /> : <Icon as={IoVideocamOff} />}
+                    icon={localVideoState?.videoEnabled ? <Icon as={IoVideocam} /> : <Icon as={IoVideocamOff} />}
                     onClick={handleCamera}
                   />
                 </Tooltip>
                 <Tooltip label="마이크" aria-label="마이크">
                   <IconButton
+                    borderRadius="5px"
                     colorScheme="whiteAlpha"
                     aria-label="button"
                     fontSize="22px"
-                    icon={true ? <Icon as={IoMdMic} /> : <Icon as={IoMdMicOff} />}
+                    // disabled
+                    icon={localVideoState?.audioEnabled ? <Icon as={IoMdMic} /> : <Icon as={IoMdMicOff} />}
                     onClick={handleMic}
                   />
                 </Tooltip>
                 <Tooltip label="나가기" aria-label="나가기">
-                  <IconButton colorScheme="red" aria-label="button" icon={<PhoneIcon />} onClick={handleExit} />
+                  <IconButton
+                    borderRadius="5px"
+                    colorScheme="red"
+                    aria-label="button"
+                    icon={<PhoneIcon />}
+                    onClick={handleExit}
+                  />
                 </Tooltip>
               </HStack>
             </Flex>

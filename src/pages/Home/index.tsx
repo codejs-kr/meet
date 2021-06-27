@@ -10,7 +10,7 @@ const Home = () => {
       <VStack>
         <Box w="300px" color="white" textAlign="center">
           <Heading mb={10} textAlign="center" fontSize={80}>
-            picasso
+            meeting
           </Heading>
           <Link to="/room/abc">
             <Button w="80%" colorScheme="teal" variant="solid">

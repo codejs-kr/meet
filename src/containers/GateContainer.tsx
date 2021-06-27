@@ -25,7 +25,6 @@ const MEDIA_CONSTRAINTS = {
 };
 
 const GateContainer = ({ roomId }: { roomId: string }) => {
-  const { isConnectedSocket } = useSelector(select.room.state);
   const dispatch = useDispatch<Dispatch>();
   const videoRef = useRef<HTMLVideoElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -58,14 +57,14 @@ const GateContainer = ({ roomId }: { roomId: string }) => {
     <Box flex="1" className="gate-container">
       <Flex h="90%" color="white" direction="column" justifyContent="center" alignItems="center">
         <Box w="260px" textAlign="center" color="facebook.900">
-          <Box w="260px" h="195px" mb="5" textAlign="center" borderRadius="20%" overflow="hidden">
+          <Box w="260px" h="195px" mb="6" textAlign="center" borderRadius="25px" overflow="hidden">
             <video autoPlay ref={videoRef} />
           </Box>
           <Input
             placeholder="닉네임을 입력해주세요!"
             maxLength={15}
-            mb="4"
-            defaultValue="이나영"
+            mb="2"
+            defaultValue="조르디"
             textAlign="center"
             ref={inputRef}
           />

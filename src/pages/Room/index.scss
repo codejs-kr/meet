@@ -2,7 +2,13 @@
   height: 100vh;
 
   video {
-    background: black;
+    background: #000;
+  }
+
+  .pip-video {
+    //  grid-area: a;
+    // align-self: center;
+    // justify-self: center;
   }
 }
 
