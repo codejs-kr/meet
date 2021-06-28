@@ -1,21 +1,21 @@
 {
   "files": {
-    "main.css": "/picasso/static/css/main.9cceafe7.chunk.css",
-    "main.js": "/picasso/static/js/main.5fc51c76.chunk.js",
-    "main.js.map": "/picasso/static/js/main.5fc51c76.chunk.js.map",
-    "runtime-main.js": "/picasso/static/js/runtime-main.20e13166.js",
-    "runtime-main.js.map": "/picasso/static/js/runtime-main.20e13166.js.map",
-    "static/js/2.d608384c.chunk.js": "/picasso/static/js/2.d608384c.chunk.js",
-    "static/js/2.d608384c.chunk.js.map": "/picasso/static/js/2.d608384c.chunk.js.map",
-    "index.html": "/picasso/index.html",
-    "static/css/main.9cceafe7.chunk.css.map": "/picasso/static/css/main.9cceafe7.chunk.css.map",
-    "static/js/2.d608384c.chunk.js.LICENSE.txt": "/picasso/static/js/2.d608384c.chunk.js.LICENSE.txt",
-    "static/media/bg-home.0e813f75.png": "/picasso/static/media/bg-home.0e813f75.png"
+    "main.css": "/static/css/main.9cceafe7.chunk.css",
+    "main.js": "/static/js/main.b7191fbd.chunk.js",
+    "main.js.map": "/static/js/main.b7191fbd.chunk.js.map",
+    "runtime-main.js": "/static/js/runtime-main.07c2dee4.js",
+    "runtime-main.js.map": "/static/js/runtime-main.07c2dee4.js.map",
+    "static/js/2.c0530927.chunk.js": "/static/js/2.c0530927.chunk.js",
+    "static/js/2.c0530927.chunk.js.map": "/static/js/2.c0530927.chunk.js.map",
+    "index.html": "/index.html",
+    "static/css/main.9cceafe7.chunk.css.map": "/static/css/main.9cceafe7.chunk.css.map",
+    "static/js/2.c0530927.chunk.js.LICENSE.txt": "/static/js/2.c0530927.chunk.js.LICENSE.txt",
+    "static/media/bg-home.0e813f75.png": "/static/media/bg-home.0e813f75.png"
   },
   "entrypoints": [
-    "static/js/runtime-main.20e13166.js",
-    "static/js/2.d608384c.chunk.js",
+    "static/js/runtime-main.07c2dee4.js",
+    "static/js/2.c0530927.chunk.js",
     "static/css/main.9cceafe7.chunk.css",
-    "static/js/main.5fc51c76.chunk.js"
+    "static/js/main.b7191fbd.chunk.js"
   ]
 }
