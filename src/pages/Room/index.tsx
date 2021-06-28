@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import { useParams, useHistory } from 'react-router-dom';
 import socket from '../../modules/socket';
 import event from '../../modules/event';
@@ -26,13 +26,13 @@ import { IoVideocam, IoVideocamOff } from 'react-icons/io5';
 import PageTemplate from '../../components/layout/PageTemplate';
 import SocketContainer from '../../containers/SocketContainer';
 import GateContainer from '../../containers/GateContainer';
-
 import PipVideo from '../../components/PipVideo';
 
 import { useSelector, useDispatch } from 'react-redux';
 import { Dispatch, select } from '../../store';
 import { peer } from '../../modules/rtc';
 import { sendMessage } from '../../modules/socket';
+import { find } from 'lodash-es';
 
 import './index.scss';
 
@@ -44,7 +44,7 @@ const Room = () => {
   const { roomId } = useParams<PathParams>();
   const history = useHistory();
 
-  const { isEnteredRoom, isConnectedSocket, userInfo, videos } = useSelector(select.room.state);
+  const { isEnteredRoom, isConnectedSocket, userInfo, participants, videos } = useSelector(select.room.state);
   const localVideoState = useSelector(select.room.localVideoState);
   const dispatch = useDispatch<Dispatch>();
 
@@ -57,12 +57,28 @@ const Room = () => {
 
     if (localVideoState.videoEnabled) {
       peer.mute('video');
-      dispatch.room.muteVideo({ userId: localVideoState.userId });
+      dispatch.room.updateVideoEnabled({
+        userId: localVideoState.userId,
+        enabled: false,
+      });
+
+      sendMessage({
+        type: 'videoEnabled',
+        body: false,
+      });
     } else {
       peer.unmute('video');
-      dispatch.room.unmuteVideo({ userId: localVideoState.userId });
+      dispatch.room.updateVideoEnabled({
+        userId: localVideoState.userId,
+        enabled: true,
+      });
+
+      sendMessage({
+        type: 'videoEnabled',
+        body: true,
+      });
     }
-  }, [localVideoState]);
+  }, [dispatch, localVideoState]);
 
   const handleMic = useCallback(() => {
     socket.send({
@@ -84,6 +100,7 @@ const Room = () => {
     if (!userInfo) {
       return;
     }
+
     event.on('chat', ({ data }) => {
       console.log('chat', data);
     });
@@ -106,7 +123,16 @@ const Room = () => {
         });
       }
     });
-  }, [userInfo]);
+
+    event.on('videoEnabled', ({ senderId, body }) => {
+      console.log('videoEnabled :>> ', senderId, body);
+
+      dispatch.room.updateVideoEnabled({
+        userId: senderId,
+        enabled: body,
+      });
+    });
+  }, [dispatch, userInfo]);
 
   useEffect(() => {
     if (isEnteredRoom && !videos.length) {
@@ -129,6 +155,8 @@ const Room = () => {
     });
   }, [dispatch]);
 
+  const gridCount = useMemo(() => (participants.length >= 4 ? 4 : participants.length), [participants]);
+
   return (
     <PageTemplate id="room">
       <SocketContainer roomId={roomId} />
@@ -139,10 +167,20 @@ const Room = () => {
             <Flex h="100%" color="white" direction="row">
               <Box w="100%" padding="10px" bg="#202123">
                 <Flex h="100%" alignItems="center" justifyContent="center">
-                  <Grid templateColumns="repeat(4, 1fr)" gap={3} alignItems="center">
-                    {videos.map(({ stream, videoEnabled, audioEnabled }, i) => (
-                      <PipVideo stream={stream} videoEnabled={videoEnabled} audioEnabled={audioEnabled} key={i} />
-                    ))}
+                  <Grid templateColumns={`repeat(${gridCount}, 1fr)`} gap={3} alignItems="center">
+                    {participants.map(({ userId, nickName }, i) => {
+                      const mediaInfo = find(videos, { userId });
+                      // TODO: mediaInfo 타입 처리 필요
+                      return (
+                        <PipVideo
+                          stream={mediaInfo?.stream}
+                          videoEnabled={!!mediaInfo?.videoEnabled}
+                          audioEnabled={!!mediaInfo?.audioEnabled}
+                          nickname={nickName}
+                          key={i}
+                        />
+                      );
+                    })}
                   </Grid>
                 </Flex>
               </Box>

@@ -9,19 +9,15 @@ let roomId: string | null = null;
 let senderId: string | null = null;
 let participants: any = null;
 
-interface SocketMessage {
-  type: string;
-  body: any;
-}
-
 type SocketMessageTarget = 'all' | string;
 
-export const sendMessage = ({ message, to = 'all' }: { message: SocketMessage; to?: SocketMessageTarget }) => {
+export const sendMessage = ({ type, body, to = 'all' }: { type: string; body: any; to?: SocketMessageTarget }) => {
   const data = {
     roomId,
     senderId,
     to: to === 'all' ? to : findSocketId(to),
-    ...message,
+    type,
+    body,
   };
 
   socket.send(data);

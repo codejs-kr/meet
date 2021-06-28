@@ -1,6 +1,7 @@
 import { createModel } from '@rematch/core';
 import { RootModel } from './';
 import { values } from 'lodash-es';
+import { sendMessage } from '../../modules/socket';
 
 interface VideoState {
   userId: string;
@@ -58,18 +59,10 @@ export const room = createModel<RootModel>()({
       state.videos.push(payload);
       return state;
     },
-    muteVideo(state, payload: { userId: string }) {
+    updateVideoEnabled(state, payload: { userId: string; enabled: boolean }) {
       state.videos.forEach((video) => {
         if (video.userId === payload.userId) {
-          video.videoEnabled = false;
-        }
-      });
-      return state;
-    },
-    unmuteVideo(state, payload: { userId: string }) {
-      state.videos.forEach((video) => {
-        if (video.userId === payload.userId) {
-          video.videoEnabled = true;
+          video.videoEnabled = payload.enabled;
         }
       });
       return state;

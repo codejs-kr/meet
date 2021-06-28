@@ -56,13 +56,11 @@ class Peer extends EventEmitter {
       if (event.candidate) {
         sendMessage({
           to: targetUserId,
-          message: {
-            type: 'signaling',
-            body: {
-              label: event.candidate.sdpMLineIndex,
-              id: event.candidate.sdpMid,
-              candidate: event.candidate.candidate,
-            },
+          type: 'signaling',
+          body: {
+            label: event.candidate.sdpMLineIndex,
+            id: event.candidate.sdpMid,
+            candidate: event.candidate.candidate,
           },
         });
       } else {
@@ -150,12 +148,10 @@ class Peer extends EventEmitter {
 
         sendMessage({
           to: peer.targetUserId,
-          message: {
-            type: 'signaling',
-            body: {
-              peerType: peer.type,
-              sdp: SDP,
-            },
+          type: 'signaling',
+          body: {
+            peerType: peer.type,
+            sdp: SDP,
           },
         });
       })
@@ -182,12 +178,10 @@ class Peer extends EventEmitter {
 
             sendMessage({
               to: peer.targetUserId,
-              message: {
-                type: 'signaling',
-                body: {
-                  peerType: peer.type,
-                  sdp: SDP,
-                },
+              type: 'signaling',
+              body: {
+                peerType: peer.type,
+                sdp: SDP,
               },
             });
           })
@@ -203,16 +197,16 @@ class Peer extends EventEmitter {
   signaling(message: any) {
     console.log('[peer] signaling', message);
 
-    const data = message.body;
-    const sdp = data?.sdp;
-    const candidate = data?.candidate;
+    const body = message.body;
+    const sdp = body?.sdp;
+    const candidate = body?.candidate;
 
     if (sdp) {
       // offer sdp에 대한 answer peer 생성
       if (sdp.type === 'offer') {
         const peer = this.createPeerConnection({
           targetUserId: message.senderId,
-          type: data.peerType,
+          type: body.peerType,
         });
         this.createAnswer(peer, sdp);
 
@@ -226,8 +220,8 @@ class Peer extends EventEmitter {
     } else if (candidate) {
       const peer = this.getPeer(message.senderId);
       const iceCandidate = new RTCIceCandidate({
-        sdpMid: data.id,
-        sdpMLineIndex: data.label,
+        sdpMid: body.id,
+        sdpMLineIndex: body.label,
         candidate: candidate,
       });
 

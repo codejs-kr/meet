@@ -29,10 +29,16 @@ const SocketContainer = ({ roomId }: { roomId: string }) => {
     [dispatch]
   );
 
-  const onLeaveUser = useCallback((data) => {
-    console.log('onLeaveUser', data);
-    event.emit('leave', data);
-  }, []);
+  const onLeaveUser = useCallback(
+    (data) => {
+      console.log('onLeaveUser', data);
+
+      dispatch.room.setParticipants(data.participants);
+      setParticipants(data.participants);
+      event.emit('leave', data);
+    },
+    [dispatch]
+  );
 
   const onMessage = useCallback((message: { type: string }) => {
     console.log('onMessage', message);
