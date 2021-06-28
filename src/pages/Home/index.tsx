@@ -10,8 +10,8 @@ import bgImage from 'assets/img/bg-home.png';
 const Home = () => {
   const history = useHistory();
   const handleEnterRoom = useCallback(() => {
-    const uuid = getRandomRoomId();
-    history.push(`/room/${uuid}`);
+    const roomId = getRandomRoomId(3);
+    history.push(`/room/${roomId}`);
   }, []);
 
   return (
@@ -23,7 +23,7 @@ const Home = () => {
             화상회의 만들며 배우는 WebRTC
           </Heading>
 
-          <Button w="260px" colorScheme="yellow" variant="solid" onClick={handleEnterRoom}>
+          <Button w="260px" colorScheme="yellow" size="lg" variant="solid" onClick={handleEnterRoom}>
             시작하기
           </Button>
         </Box>

@@ -14,8 +14,8 @@ export const getUuid = () => {
   return uuidv4();
 };
 
-export const getRandomRoomId = () => {
-  return randomWord(3).join('-');
+export const getRandomRoomId = (count: number = 1) => {
+  return randomWord(count).join('-');
 };
 
 /**

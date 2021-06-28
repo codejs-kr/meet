@@ -84,6 +84,8 @@ const ChatContainer = () => {
           nickName,
           message: body,
         });
+
+        setTimeout(() => handleScrollToBottom(), 0);
       }
     });
   }, [dispatch]);
