@@ -76,8 +76,8 @@ const ChatContainer = () => {
     [participants]
   );
 
-  useEffect(() => {
-    event.on('chat', ({ senderId, body }) => {
+  const onChat = useCallback(
+    ({ senderId, body }) => {
       const nickName = findParticipantInfo(senderId)?.nickName ?? null;
       if (nickName) {
         dispatch.room.addChat({
@@ -87,8 +87,14 @@ const ChatContainer = () => {
 
         setTimeout(() => handleScrollToBottom(), 0);
       }
-    });
-  }, [dispatch]);
+    },
+    [dispatch, findParticipantInfo, handleScrollToBottom]
+  );
+
+  useEffect(() => {
+    event.removeAllListeners('chat');
+    event.on('chat', onChat);
+  }, [onChat]);
 
   return (
     <Box margin="6px 6px 0 6px" bg="rgba(255,255,255,0.92)" color="#000" borderRadius="5px" boxShadow="10px">
