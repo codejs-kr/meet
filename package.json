@@ -2,6 +2,7 @@
   "name": "picasso",
   "version": "0.1.0",
   "private": true,
+  "homepage": "https://play.codejs.co.kr/picasso",
   "dependencies": {
     "@chakra-ui/icons": "^1.0.13",
     "@chakra-ui/react": "^1.6.4",
@@ -50,7 +51,8 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "deploy": "gh-pages -d build"
+    "deploy": "gh-pages -d build",
+    "build:deploy": "react-scripts build && gh-pages -d build"
   },
   "eslintConfig": {
     "extends": [

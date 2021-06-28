@@ -1,7 +1,7 @@
 import io from 'socket.io-client';
+import { isNodeProdcution } from 'modules/env';
 
-const SOCKET_SERVER =
-  process.env.NODE_ENV === 'production' ? 'https://webrtclab.herokuapp.com' : 'http://localhost:3000';
+const SOCKET_SERVER = isNodeProdcution ? 'https://webrtclab.herokuapp.com' : 'http://localhost:3000';
 
 const socket = io(SOCKET_SERVER);
 

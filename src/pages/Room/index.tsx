@@ -4,9 +4,10 @@ import { useSelector, useDispatch } from 'react-redux';
 import { Dispatch, select } from 'store';
 import { find } from 'lodash-es';
 
-import socket, { sendMessage } from 'modules/socket';
-import event from 'modules/event';
+import { basename } from 'modules/env';
+import { sendMessage } from 'modules/socket';
 import { peer } from 'modules/rtc';
+import event from 'modules/event';
 
 import { Flex, Box, HStack, Tooltip, IconButton, Icon, Grid } from '@chakra-ui/react';
 import { PhoneIcon } from '@chakra-ui/icons';
@@ -67,7 +68,7 @@ const Room = () => {
 
   const handleExit = useCallback(() => {
     if (window.confirm('미팅에서 나가겠습니까?')) {
-      window.location.href = '/';
+      window.location.href = `/${basename}`;
     }
   }, []);
 
