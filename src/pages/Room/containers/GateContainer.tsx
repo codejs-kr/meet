@@ -2,10 +2,10 @@ import { useCallback, useEffect, useRef, useMemo } from 'react';
 import { Flex, Box, Input, Button } from '@chakra-ui/react';
 
 import { useSelector, useDispatch } from 'react-redux';
-import { Dispatch, select } from '../store';
-import { peer } from '../modules/rtc';
-import { getUuid } from '../modules/utils';
-import socket from '../modules/socket';
+import { Dispatch, select } from 'store';
+import { peer } from 'modules/rtc';
+import { getUuid } from 'modules/utils';
+import socket from 'modules/socket';
 
 const MEDIA_CONSTRAINTS = {
   audio: false,
@@ -68,7 +68,7 @@ const GateContainer = ({ roomId }: { roomId: string }) => {
             textAlign="center"
             ref={inputRef}
           />
-          <Button colorScheme="blue" w="100%" onClick={handleEnterRoom}>
+          <Button colorScheme="yellow" w="100%" onClick={handleEnterRoom}>
             입장하기
           </Button>
         </Box>

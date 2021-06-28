@@ -10,6 +10,7 @@
     "@rematch/core": "^2.0.1",
     "@rematch/immer": "^2.0.1",
     "@rematch/select": "^3.0.1",
+    "classnames": "^2.3.1",
     "events": "^3.3.0",
     "framer-motion": "^4.1.17",
     "lodash-es": "^4.17.21",

@@ -1,7 +1,6 @@
 import { createModel } from '@rematch/core';
 import { RootModel } from './';
 import { values } from 'lodash-es';
-import { sendMessage } from '../../modules/socket';
 
 interface VideoState {
   userId: string;
@@ -9,12 +8,18 @@ interface VideoState {
   videoEnabled: boolean;
   audioEnabled: boolean;
 }
+interface ChatState {
+  nickName: string;
+  message: string;
+  isMine?: boolean;
+}
 interface RoomState {
   isEnteredRoom: boolean;
   isConnectedSocket: boolean;
   userInfo: any | null;
   participants: any[];
   videos: VideoState[];
+  chatList: ChatState[];
 }
 
 const initialState: RoomState = {
@@ -23,6 +28,7 @@ const initialState: RoomState = {
   userInfo: null,
   participants: [],
   videos: [],
+  chatList: [],
 };
 
 export const room = createModel<RootModel>()({
@@ -65,6 +71,10 @@ export const room = createModel<RootModel>()({
           video.videoEnabled = payload.enabled;
         }
       });
+      return state;
+    },
+    addChat(state, payload: ChatState) {
+      state.chatList.push(payload);
       return state;
     },
   },

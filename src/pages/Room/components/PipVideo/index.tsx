@@ -7,12 +7,12 @@ interface Props {
   stream: any;
   videoEnabled: boolean;
   audioEnabled: boolean;
-  nickname: string;
+  nickName: string;
 }
 
 const PROFILE_URL = 'https://i.pinimg.com/originals/51/8f/df/518fdfc4f597e9c8efca678502a6c041.gif';
 
-const PipVideo = ({ stream, videoEnabled, audioEnabled, nickname }: Props) => {
+const PipVideo = ({ stream, videoEnabled, audioEnabled, nickName }: Props) => {
   const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
@@ -26,7 +26,7 @@ const PipVideo = ({ stream, videoEnabled, audioEnabled, nickname }: Props) => {
       <video autoPlay ref={videoRef} />
 
       <Box className="nickname" as="span" borderRadius="md" bg="rgba(0,0,0,0.3)" color="white" px={2} minWidth="50px">
-        {nickname}
+        {nickName}
       </Box>
 
       {!videoEnabled && (

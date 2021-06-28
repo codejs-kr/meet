@@ -1,38 +1,23 @@
 import { useCallback, useEffect, useMemo } from 'react';
-import { useParams, useHistory } from 'react-router-dom';
-import socket from '../../modules/socket';
-import event from '../../modules/event';
+import { useParams } from 'react-router-dom';
+import { useSelector, useDispatch } from 'react-redux';
+import { Dispatch, select } from 'store';
+import { find } from 'lodash-es';
 
-import {
-  Flex,
-  Box,
-  HStack,
-  Text,
-  Tooltip,
-  IconButton,
-  Icon,
-  Grid,
-  Center,
-  Button,
-  Input,
-  Square,
-  Circle,
-  VStack,
-  Stack,
-} from '@chakra-ui/react';
+import socket, { sendMessage } from 'modules/socket';
+import event from 'modules/event';
+import { peer } from 'modules/rtc';
+
+import { Flex, Box, HStack, Tooltip, IconButton, Icon, Grid } from '@chakra-ui/react';
 import { PhoneIcon } from '@chakra-ui/icons';
 import { IoMdMic, IoMdMicOff } from 'react-icons/io';
 import { IoVideocam, IoVideocamOff } from 'react-icons/io5';
 import PageTemplate from '../../components/layout/PageTemplate';
-import SocketContainer from '../../containers/SocketContainer';
-import GateContainer from '../../containers/GateContainer';
-import PipVideo from '../../components/PipVideo';
+import SocketContainer from './containers/SocketContainer';
+import GateContainer from './containers/GateContainer';
+import ChatContainer from './containers/ChatContainer';
 
-import { useSelector, useDispatch } from 'react-redux';
-import { Dispatch, select } from '../../store';
-import { peer } from '../../modules/rtc';
-import { sendMessage } from '../../modules/socket';
-import { find } from 'lodash-es';
+import PipVideo from './components/PipVideo';
 
 import './index.scss';
 
@@ -42,13 +27,9 @@ interface PathParams {
 
 const Room = () => {
   const { roomId } = useParams<PathParams>();
-  const history = useHistory();
-
-  const { isEnteredRoom, isConnectedSocket, userInfo, participants, videos } = useSelector(select.room.state);
+  const { isEnteredRoom, userInfo, participants, videos } = useSelector(select.room.state);
   const localVideoState = useSelector(select.room.localVideoState);
   const dispatch = useDispatch<Dispatch>();
-
-  console.log('localVideoState :>> ', localVideoState);
 
   const handleCamera = useCallback(() => {
     if (!localVideoState) {
@@ -81,13 +62,7 @@ const Room = () => {
   }, [dispatch, localVideoState]);
 
   const handleMic = useCallback(() => {
-    socket.send({
-      roomId,
-      senderId: 'abc',
-      to: 'all',
-      type: 'chat',
-      data: 'message',
-    });
+    // do something
   }, [roomId]);
 
   const handleExit = useCallback(() => {
@@ -100,10 +75,6 @@ const Room = () => {
     if (!userInfo) {
       return;
     }
-
-    event.on('chat', ({ data }) => {
-      console.log('chat', data);
-    });
 
     event.on('signaling', (data) => {
       if (userInfo.userId !== data.senderId) {
@@ -176,7 +147,7 @@ const Room = () => {
                           stream={mediaInfo?.stream}
                           videoEnabled={!!mediaInfo?.videoEnabled}
                           audioEnabled={!!mediaInfo?.audioEnabled}
-                          nickname={nickName}
+                          nickName={nickName}
                           key={i}
                         />
                       );
@@ -184,8 +155,8 @@ const Room = () => {
                   </Grid>
                 </Flex>
               </Box>
-              <Box w="450px" bg="blue.200">
-                <Text>Chat</Text>
+              <Box w="450px" h="100%" bg="#202123">
+                <ChatContainer />
               </Box>
             </Flex>
           </Box>
