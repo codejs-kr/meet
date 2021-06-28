@@ -4,13 +4,14 @@ import { ChakraProvider } from '@chakra-ui/react';
 import { store } from './store';
 import Home from 'pages/Home';
 import Room from 'pages/Room';
-// import utils from 'modules/utils';
+
+const basename = `${process.env.REACT_APP_NAME}`;
 
 const App = () => {
   return (
     <Provider store={store}>
       <ChakraProvider>
-        <Router>
+        <Router basename={basename}>
           <Switch>
             <Route exact path="/" component={Home} />
             <Route path="/room/:roomId" component={Room} />
