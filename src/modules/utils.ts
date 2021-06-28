@@ -1,5 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 import { throttle } from 'lodash-es';
+import randomWord from 'random-words';
 
 const REPEAT_HOLD_TIME = 1000;
 const THROTTLE_OPTIONS = {
@@ -11,6 +12,10 @@ const THROTTLE_OPTIONS = {
  */
 export const getUuid = () => {
   return uuidv4();
+};
+
+export const getRandomRoomId = () => {
+  return randomWord(3).join('-');
 };
 
 /**

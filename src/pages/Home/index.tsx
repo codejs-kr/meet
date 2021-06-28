@@ -1,22 +1,31 @@
-import { Link } from 'react-router-dom';
+import { useCallback } from 'react';
+import { useHistory } from 'react-router-dom';
 import { Box, Center, Button, VStack } from '@chakra-ui/react';
 import { Heading } from '@chakra-ui/react';
+import { getRandomRoomId } from 'modules/utils';
 
 import './index.scss';
+import bgImage from 'assets/img/bg-home.png';
 
 const Home = () => {
+  const history = useHistory();
+  const handleEnterRoom = useCallback(() => {
+    const uuid = getRandomRoomId();
+    history.push(`/room/${uuid}`);
+  }, []);
+
   return (
-    <Center bg="tomato" h="100vh" color="white">
+    <Center h="80vh" color="white">
       <VStack>
-        <Box w="300px" color="white" textAlign="center">
-          <Heading mb={10} textAlign="center" fontSize={80}>
-            meeting
+        <Box w="500px" color="white" textAlign="center">
+          <img src={bgImage} alt="화상회의 만들며 배우는 WebRTC" />
+          <Heading mt={10} mb={10} textAlign="center" fontSize={40} color="#000">
+            화상회의 만들며 배우는 WebRTC
           </Heading>
-          <Link to="/room/abc">
-            <Button w="80%" colorScheme="teal" variant="solid">
-              Create
-            </Button>
-          </Link>
+
+          <Button w="260px" colorScheme="yellow" variant="solid" onClick={handleEnterRoom}>
+            시작하기
+          </Button>
         </Box>
       </VStack>
     </Center>
