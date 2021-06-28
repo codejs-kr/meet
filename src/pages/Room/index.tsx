@@ -86,8 +86,6 @@ const Room = () => {
       const joinUserId = data.userInfo.userId;
 
       if (userInfo.userId !== joinUserId) {
-        console.log('참여자 발견', data);
-
         peer.startRtcConnection({
           targetUserId: joinUserId,
           type: 'userMedia',
