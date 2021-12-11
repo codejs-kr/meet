@@ -1,8 +1,8 @@
 {
-  "name": "picasso",
-  "version": "0.1.0",
+  "name": "meet",
+  "version": "0.2.0",
   "private": true,
-  "homepage": "https://play.codejs.co.kr/picasso",
+  "homepage": "https://play.codejs.co.kr/meet",
   "dependencies": {
     "@chakra-ui/icons": "^1.0.13",
     "@chakra-ui/react": "^1.6.4",
